@@ -120,7 +120,9 @@ def get_dataset(
       device=device,
       output_all_columns=True,
   )
-  return ds
+
+  data_collator = transformers.DataCollatorWithPadding(tokenizer=tokenizer, padding=True)
+  return ds, data_collator
 
 
 def main() -> None:
@@ -140,7 +142,7 @@ def main() -> None:
   model.to(device)
   model.eval()
 
-  ds = get_dataset(
+  ds, data_collator = get_dataset(
       args.input_file,
       tokenizer,
       args.max_input_length,
@@ -156,6 +158,7 @@ def main() -> None:
   trainer = transformers.Trainer(
       model=model,
       args=training_args,
+      data_collator=data_collator,
   )
   predictions, _, _ = trainer.predict(test_dataset=ds["test"])
 
